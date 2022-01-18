@@ -1,0 +1,59 @@
+
+Intégration Continue
+Avoir des tests sur un repository vous donne un avantage considérable : vous pouvez mettre en place une Intégration continue. La section Best Practices de cet article Wikipedia vaut la peine d’être lue.
+
+Le but de cet exercice est de lier notre logiciel de contrôle de version avec un moteur de production. L’idée est d’exécuter un moteur de production à chaque fois qu’un versionnage est envoyé à l’outil de contrôle de version. Quelle que soit la branche, un processus de production est déclenché pour donner un retour aux développeurs sur ce versionnage, si il est vert ou rouge (ce qui signifie que les tests passent / que la production peut être terminée).
+
+Outils
+Comme pour les logiciels de contrôle de version, il existe de nombreux outils permettant de réaliser de l’intégration continue :
+
+Jenkins, le logiciel de CI le plus populaire (vous devez l’installer)
+Github Actions, l’outil de Github pour mettre en place des workflows et du CI/CD
+Travis, le service de CI cloud le plus populaire
+Beaucoup d’autres
+Pour garder cet exercice simple, nous utiliserons Github Actions, car c’est l’outil directement intégré dans GitHub (et vous verrez que c’est important) sans aucun effort de configuration de la part du développeur. De plus, il est gratuit pour les repositories publics de GitHub !
+
+Mise en place
+Nous allons déployer le repository que vous avez créé dans l’exercice 02-TDD. D’abord, créez un repository vide longest-word dans votre compte Github. Après cela, vous pouvez pousser vos changements :
+
+cd ~/code/magrousseau/longest-word
+
+git init
+git add .
+git commit -m "Game development with TDD"
+
+git remote add origin git@github.com:magrousseau/longest-word.git
+
+git push origin master
+Workflow CI
+Vous devez maintenant écrire un script de configuration pour le CI (Intégration Continue). Ces outils sont génériques, ils peuvent construire des programmes dans de nombreux langages, avec de nombreux frameworks. Nous devons être spécifiques et expliquer à Githun Actions que notre projet est un projet Python 3, que nous utilisons pipenv pour gérer les dépendances externes et que nous utilisons nosetests pour exécuter les tests.
+
+Pour se faire, Github va lire le fichier .python-ci.yml situé dans votre dossier .github/workflows :
+
+mkdir -p .github/workflows
+touch .github/workflows/.python-ci.yml
+# .python-ci.yml
+
+name: basic CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pipenv
+        pipenv install --dev
+    - name: Test with nose
+      run: |
+        pipenv run nosetests
