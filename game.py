@@ -1,10 +1,9 @@
-"""For the missing module docstring"""
+# pylint: disable=missing-docstring
+# pylint: disable=too-few-public-methods
 
 import random
 import string
 
-# pylint: disable=missing-docstring
-# pylint: disable=too-few-public-methods
 
 class Game:
     def __init__(self):
